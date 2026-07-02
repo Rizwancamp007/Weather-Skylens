@@ -1,11 +1,11 @@
 /* ============================================
    SkyLens Weather App — Main Script
    ============================================ */
-
+const BACKEND_URL = 'https://weather-skylens.onrender.com'; 
 // ============ CONFIGURATION ============
-const API_BASE = '/api/weather';
-const AUTH_BASE = '/api/auth';
-const HISTORY_BASE = '/api/history';
+const API_BASE = '${BACKEND_URL}/api/weather';
+const AUTH_BASE = '${BACKEND_URL}/api/auth';
+const HISTORY_BASE = '${BACKEND_URL}/api/history';
 const OWM_ICON_URL = 'https://openweathermap.org/img/wn/';
 const OWM_TILE_URL = 'https://tile.openweathermap.org/map';
 

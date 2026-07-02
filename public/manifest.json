@@ -1,0 +1,17 @@
+{
+  "name": "SkyLens Weather App",
+  "short_name": "SkyLens",
+  "description": "Premium weather application with real-time forecasts, interactive maps, and air quality data.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#E8F4FD",
+  "theme_color": "#63B3ED",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/assets/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512"
+    }
+  ]
+}

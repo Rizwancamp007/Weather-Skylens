@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SkyLens — Premium weather application with real-time forecasts, interactive maps, air quality data, and beautiful glassmorphism design.">
+  <meta name="theme-color" content="#63B3ED">
+  <title>SkyLens — Weather App</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <!-- App Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ===== Animated Background ===== -->
+  <div class="bg-layer" id="bgLayer">
+    <div class="cloud cloud-1"></div>
+    <div class="cloud cloud-2"></div>
+    <div class="cloud cloud-3"></div>
+    <div class="cloud cloud-4"></div>
+    <div class="particles">
+      <div class="particle"></div><div class="particle"></div>
+      <div class="particle"></div><div class="particle"></div>
+      <div class="particle"></div><div class="particle"></div>
+      <div class="particle"></div><div class="particle"></div>
+    </div>
+    <div class="rain-layer" id="rainLayer">
+      <div class="raindrop"></div><div class="raindrop"></div>
+      <div class="raindrop"></div><div class="raindrop"></div>
+      <div class="raindrop"></div><div class="raindrop"></div>
+      <div class="raindrop"></div><div class="raindrop"></div>
+      <div class="raindrop"></div><div class="raindrop"></div>
+      <div class="raindrop"></div><div class="raindrop"></div>
+    </div>
+    <div class="snow-layer" id="snowLayer">
+      <div class="snowflake"></div><div class="snowflake"></div>
+      <div class="snowflake"></div><div class="snowflake"></div>
+      <div class="snowflake"></div><div class="snowflake"></div>
+      <div class="snowflake"></div><div class="snowflake"></div>
+    </div>
+    <div class="lightning-overlay" id="lightningOverlay"></div>
+  </div>
+
+  <!-- ===== Main App ===== -->
+  <div class="app-container">
+
+    <!-- Header -->
+    <header class="app-header">
+      <div class="app-logo">
+        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="18" cy="16" r="8" fill="#F6AD55"/>
+          <path d="M18 4v3M18 25v3M28 16h3M5 16h3M25.1 8.9l2.1-2.1M8.8 25.2l2.1-2.1M25.1 23.1l2.1 2.1M8.8 6.8l2.1 2.1" stroke="#F6AD55" stroke-width="2" stroke-linecap="round"/>
+          <path d="M14 26c-3.3 0-6-2.2-6-5s2.7-5 6-5c.3-3.3 3.2-6 6.5-6 3.6 0 6.5 2.9 6.5 6.5 0 .2 0 .3 0 .5 2 .7 3.5 2.5 3.5 4.5 0 2.8-2.5 5-5.5 5H14z" fill="#63B3ED" opacity="0.8"/>
+        </svg>
+        <h1>SkyLens</h1>
+      </div>
+      <div class="header-controls">
+        <button class="unit-toggle" id="unitToggle" title="Toggle °C / °F">°C</button>
+        <button class="icon-btn" id="themeToggle" title="Toggle dark mode" aria-label="Toggle dark mode">🌙</button>
+        <button class="icon-btn" id="notifBtn" title="Enable notifications" aria-label="Enable notifications">🔔</button>
+        <button class="auth-btn" id="authBtn"><span class="auth-label">Login</span></button>
+      </div>
+    </header>
+
+    <!-- Search -->
+    <section class="search-container">
+      <div class="search-bar">
+        <input type="text" id="cityInput" placeholder="Search any city..." autocomplete="off" aria-label="City search">
+        <button class="location-btn" id="locationBtn" title="Use my location" aria-label="Use my location">📍</button>
+        <button class="search-btn" id="searchBtn">Search</button>
+      </div>
+      <div class="recent-dropdown" id="recentDropdown"></div>
+    </section>
+
+    <!-- Welcome State -->
+    <div id="welcomeState" class="welcome-state">
+      <div class="welcome-icon">🌤️</div>
+      <h2>Welcome to SkyLens</h2>
+      <p>Search for any city to see real-time weather, forecasts, air quality, and more.</p>
+    </div>
+
+    <!-- Loading Skeleton -->
+    <div id="loadingSkeleton" class="hidden">
+      <div class="glass-card weather-hero">
+        <div class="weather-hero-content">
+          <div class="skeleton skeleton-icon"></div>
+          <div style="flex:1">
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-text" style="width:40%"></div>
+            <div class="skeleton skeleton-text" style="width:60%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="detail-grid">
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+      </div>
+    </div>
+
+    <!-- Weather Content (hidden until data loads) -->
+    <div id="weatherContent" class="hidden">
+
+      <!-- Main Weather Card -->
+      <section class="glass-card weather-hero" id="weatherHero">
+        <div class="weather-hero-content">
+          <div class="weather-icon-wrap">
+            <img id="weatherIcon" src="" alt="Weather icon">
+          </div>
+          <div class="weather-info">
+            <h2 class="weather-city">
+              <span id="cityName"></span>
+              <span class="country-badge" id="countryBadge"></span>
+            </h2>
+            <div class="weather-temp">
+              <span id="tempValue"></span><span class="unit" id="tempUnit">°C</span>
+            </div>
+            <p class="weather-feels">Feels like <span id="feelsLike"></span>°</p>
+            <p class="weather-desc" id="weatherDesc"></p>
+            <div class="weather-meta">
+              <span>📅 <span id="localDate"></span></span>
+              <span>🕒 <span id="localTime"></span></span>
+            </div>
+            <button class="fav-btn" id="favBtn">⭐ Add to Favorites</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Detail Cards -->
+      <section class="detail-grid" id="detailGrid"></section>
+
+      <!-- Temperature Chart -->
+      <section class="glass-card chart-section" id="chartSection">
+        <h3 class="section-title"><span class="section-icon">📊</span> 24-Hour Temperature</h3>
+        <div class="chart-container">
+          <canvas id="tempChart"></canvas>
+        </div>
+      </section>
+
+      <!-- AQI -->
+      <section class="glass-card aqi-section" id="aqiSection">
+        <h3 class="section-title"><span class="section-icon">🌬️</span> Air Quality Index</h3>
+        <div class="aqi-level">
+          <span id="aqiValue"></span>
+          <span class="aqi-badge" id="aqiBadge"></span>
+        </div>
+        <div class="aqi-bar-wrap"><div class="aqi-bar" id="aqiBar"></div></div>
+        <div class="aqi-pollutants" id="aqiPollutants"></div>
+      </section>
+
+      <!-- 5-Day Forecast -->
+      <section class="forecast-section">
+        <h3 class="section-title"><span class="section-icon">📅</span> 5-Day Forecast</h3>
+        <div class="forecast-scroll" id="forecastScroll"></div>
+      </section>
+
+      <!-- Weather Map -->
+      <section class="glass-card map-section" id="mapSection">
+        <h3 class="section-title"><span class="section-icon">🗺️</span> Weather Map</h3>
+        <div class="map-container" id="mapContainer"></div>
+        <div class="map-controls">
+          <button class="map-layer-btn active" data-layer="temp">🌡️ Temperature</button>
+          <button class="map-layer-btn" data-layer="clouds">☁️ Clouds</button>
+          <button class="map-layer-btn" data-layer="precipitation">🌧️ Precipitation</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Favorites -->
+    <section class="favorites-section" id="favoritesSection">
+      <h3 class="section-title"><span class="section-icon">⭐</span> Favorite Cities</h3>
+      <div class="favorites-list" id="favoritesList"></div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>SkyLens Weather Built By Rizwan Khan & Powered By <a href="https://openweathermap.org" target="_blank" rel="noopener">OpenWeatherMap</a></p>
+    </footer>
+  </div>
+
+  <!-- ===== Auth Modal ===== -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal-content" style="position:relative;">
+      <button class="modal-close" id="modalClose">&times;</button>
+
+      <!-- Login Form -->
+      <div id="loginForm">
+        <h2 class="modal-title">Welcome Back</h2>
+        <div class="modal-error" id="loginError"></div>
+        <form class="modal-form" id="loginFormEl">
+          <div class="form-group">
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" placeholder="you@example.com" required>
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" placeholder="••••••••" required minlength="6">
+          </div>
+          <button type="submit" class="modal-submit">Login</button>
+        </form>
+        <p class="modal-toggle">Don't have an account? <a id="showRegister">Sign up</a></p>
+      </div>
+
+      <!-- Register Form -->
+      <div id="registerForm" class="hidden">
+        <h2 class="modal-title">Create Account</h2>
+        <div class="modal-error" id="registerError"></div>
+        <form class="modal-form" id="registerFormEl">
+          <div class="form-group">
+            <label for="registerName">Name</label>
+            <input type="text" id="registerName" placeholder="Your name" required>
+          </div>
+          <div class="form-group">
+            <label for="registerEmail">Email</label>
+            <input type="email" id="registerEmail" placeholder="you@example.com" required>
+          </div>
+          <div class="form-group">
+            <label for="registerPassword">Password</label>
+            <input type="password" id="registerPassword" placeholder="Min 6 characters" required minlength="6">
+          </div>
+          <button type="submit" class="modal-submit">Create Account</button>
+        </form>
+        <p class="modal-toggle">Already have an account? <a id="showLogin">Login</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- App Script -->
+  <script src="script.js"></script>
+</body>
+</html>

@@ -14,6 +14,9 @@ const historyRoutes = require('./routes/history');
 
 const app = express();
 
+// Trust reverse proxy (needed for express-rate-limit on Render)
+app.set('trust proxy', 1);
+
 // --------------- Security Middleware ---------------
 app.use(helmet({
   contentSecurityPolicy: {
@@ -27,7 +30,8 @@ app.use(helmet({
     },
   },
 }));
-app.use(cors({ origin: 'https://weather-skylens.onrender.com' }));
+// Allow requests from the Vercel frontend
+app.use(cors({ origin: ['https://skylens-weather.vercel.app', 'http://localhost:5000'] }));
 app.use(express.json());
 
 // Rate limiter: 100 requests per 15 minutes per IP

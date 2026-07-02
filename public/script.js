@@ -1,11 +1,11 @@
 /* ============================================
    SkyLens Weather App — Main Script
    ============================================ */
-const BACKEND_URL = 'https://weather-skylens.onrender.com'; 
+const BACKEND_URL = 'https://weather-skylens.onrender.com';
 // ============ CONFIGURATION ============
-const API_BASE = '${BACKEND_URL}/api/weather';
-const AUTH_BASE = '${BACKEND_URL}/api/auth';
-const HISTORY_BASE = '${BACKEND_URL}/api/history';
+const API_BASE = BACKEND_URL + '/api/weather';
+const AUTH_BASE = BACKEND_URL + '/api/auth';
+const HISTORY_BASE = BACKEND_URL + '/api/history';
 const OWM_ICON_URL = 'https://openweathermap.org/img/wn/';
 const OWM_TILE_URL = 'https://tile.openweathermap.org/map';
 
@@ -761,7 +761,7 @@ async function fetchAllWeatherData(fetchFnCurrent, fetchFnForecast, fetchFnAQI) 
     renderTempChart(forecast);
     renderAQI(aqi);
     initMap(coord.lat, coord.lon);
-    
+
     updateRecentSearches(current.name);
 
   } catch (err) {
@@ -855,7 +855,7 @@ function setupEventListeners() {
     if (e.key === 'Enter') handleCitySearch(DOM.cityInput.value.trim());
   });
   DOM.cityInput.addEventListener('focus', renderRecentDropdown);
-  
+
   // Close dropdown on outside click
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.search-container')) {

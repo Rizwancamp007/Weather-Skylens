@@ -954,12 +954,12 @@ async function init() {
         );
       },
       () => {
-        handleCitySearch('London'); // Default fallback
+        handleCitySearch('Lahore'); // Default fallback
       },
       { timeout: 5000 }
     );
   } else {
-    handleCitySearch('London');
+    handleCitySearch('Lahore');
   }
 }
 

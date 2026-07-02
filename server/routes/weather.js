@@ -37,7 +37,7 @@ async function proxyFetch(endpoint, params) {
   return data;
 }
 
-// GET /api/weather/current?city=London  OR  ?lat=51.5&lon=-0.12
+// GET /api/weather/current?city=Lahore  OR  ?lat=51.5&lon=-0.12
 router.get('/current', optionalAuth, async (req, res) => {
   try {
     const { city, lat, lon, units = 'metric' } = req.query;
@@ -84,7 +84,7 @@ router.get('/current', optionalAuth, async (req, res) => {
   }
 });
 
-// GET /api/weather/forecast?city=London  OR  ?lat=51.5&lon=-0.12
+// GET /api/weather/forecast?city=Lahore  OR  ?lat=51.5&lon=-0.12
 router.get('/forecast', async (req, res) => {
   try {
     const { city, lat, lon, units = 'metric' } = req.query;

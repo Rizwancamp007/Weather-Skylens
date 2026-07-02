@@ -27,7 +27,7 @@ app.use(helmet({
     },
   },
 }));
-app.use(cors());
+app.use(cors({ origin: 'https://weather-skylens.onrender.com' }));
 app.use(express.json());
 
 // Rate limiter: 100 requests per 15 minutes per IP

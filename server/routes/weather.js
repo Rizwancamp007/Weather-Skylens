@@ -136,4 +136,33 @@ router.get('/aqi', async (req, res) => {
   }
 });
 
+// GET /api/weather/tile/:layer/:z/:x/:y.png
+router.get('/tile/:layer/:z/:x/:y.png', async (req, res) => {
+  try {
+    const { layer, z, x, y } = req.params;
+    const apiKey = process.env.OPENWEATHER_API_KEY;
+    
+    if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
+      return res.status(503).end();
+    }
+
+    const url = `https://tile.openweathermap.org/map/${layer}/${z}/${x}/${y}.png?appid=${apiKey}`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      return res.status(response.status).end();
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    res.set('Content-Type', 'image/png');
+    res.set('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
+    res.send(buffer);
+  } catch (error) {
+    console.error('Tile proxy error:', error);
+    res.status(500).end();
+  }
+});
+
 module.exports = router;

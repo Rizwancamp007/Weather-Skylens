@@ -518,8 +518,15 @@ function initMap(lat, lon) {
 
   updateMapMarker(lat, lon);
 
-  // Invalidate size after animation
-  setTimeout(() => state.map.invalidateSize(), 600);
+  // Load the active layer if set, or default to temp
+  const defaultLayer = state.activeMapLayer || 'temp';
+  state.activeMapLayer = null; // Reset temporarily to force toggle
+  toggleMapLayer(defaultLayer);
+
+  // Invalidate size after animation and layer load
+  setTimeout(() => {
+    state.map.invalidateSize();
+  }, 600);
 }
 
 function updateMapMarker(lat, lon) {
@@ -805,21 +812,45 @@ function handleGeoLocation() {
 // Map Layers
 function toggleMapLayer(layerType) {
   if (!state.map) return;
-  const apiKey = 'YOUR_API_KEY_HERE'; // In production, backend should provide the tile URL proxy, but OWM tiles require key client-side too if directly used, or we just use proxy. For simplicity, we assume map tiles use direct URL if they have a key, but since key is hidden, we might need a backend proxy for tiles too. We'll leave it as a placeholder.
 
-  if (state.activeMapLayer === layerType) return;
-  state.activeMapLayer = layerType;
-
+  // Toggle buttons visually
   $$('.map-layer-btn').forEach(b => b.classList.toggle('active', b.dataset.layer === layerType));
 
-  // Remove existing weather layer
+  // Remove existing weather layer if any
   if (state.mapLayers.current) {
     state.map.removeLayer(state.mapLayers.current);
+    state.mapLayers.current = null;
   }
 
-  // OWM Map layers are tricky without client-side key.
-  // We'll simulate toggling for UI demonstration, but realistically
-  // it requires a tile proxy or client-side key.
+  // If clicking the currently active layer, just remove it and return (toggle off)
+  if (state.activeMapLayer === layerType) {
+    state.activeMapLayer = null;
+    $$('.map-layer-btn').forEach(b => b.classList.remove('active'));
+    showToast(`Removed map layer`, 'info', 2000);
+    return;
+  }
+
+  state.activeMapLayer = layerType;
+
+  // Map our UI layer names to OpenWeatherMap layer names
+  const owmLayerNames = {
+    'temp': 'temp_new',
+    'clouds': 'clouds_new',
+    'precipitation': 'precipitation_new'
+  };
+
+  const owmName = owmLayerNames[layerType];
+
+  if (owmName) {
+    // We use the proxy route on our backend to avoid exposing the API key
+    const tileUrl = `${API_BASE}/tile/${owmName}/{z}/{x}/{y}.png`;
+    state.mapLayers.current = L.tileLayer(tileUrl, {
+      opacity: 0.65,
+      maxZoom: 18,
+      attribution: '&copy; OpenWeatherMap'
+    }).addTo(state.map);
+  }
+
   showToast(`Switched map layer to ${layerType}`, 'info', 2000);
 }
 
